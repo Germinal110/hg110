@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot hg110</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .chatbot {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .avatar {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .avatar img {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin-right: 15px;
+            padding: 5px;
+            background-color: white;
+        }
+
+        .chat-content {
+            height: 600px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .message img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .bot-message {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+
+        .example-box {
+            background-color: #e5edff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .method-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot">
+        <div class="avatar">
+            <img src="https://forge.apps.education.fr/epruvost3/chatbot-hg110/-/raw/Images/OIG-removebg-preview.png" alt="Avatar assistant">
+            <div>
+                <h1>Chatbot hg110</h1>
+                <p>Guide méthodologique Histoire-Géographie</p>
+            </div>
+        </div>
+        <div class="chat-content" id="chatContent"></div>
+    </div>
+
+    <script>
+        const chatContent = document.getElementById('chatContent');
+
+        const chatData = {
+            start: {
+                message: "Bonjour ! Je suis hg110, votre assistant pour la méthodologie du développement construit en Histoire-Géographie. Par où souhaitez-vous commencer ?",
+                choices: [
+                    { text: "Voir un exemple concret", next: "exemple_sujet" },
+                    { text: "Découvrir la méthode", next: "methode" }
+                ]
+            },
+            methode: {
+                message: "Le développement construit suit une structure précise :\n\n1. Introduction\n2. Développement (méthode AEI)\n3. Conclusion\n\nQue souhaitez-vous approfondir ?",
+                choices: [
+                    { text: "L'introduction", next: "introduction" },
+                    { text: "La méthode AEI", next: "aei" },
+                    { text: "La conclusion", next: "conclusion" }
+                ]
+            },
+            introduction: {
+                message: "## L'introduction doit contenir 3 éléments :\n\n1. Le contexte historique/géographique\n2. La définition des termes clés\n3. La problématique\n\nVoulez-vous voir un exemple d'introduction ?",
+                choices: [
+                    { text: "Voir l'exemple", next: "exemple_intro_1" }
+                ]
+            },
+            exemple_intro_1: {
+                message: `<div class="example-box">
+                    En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire: régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression. Quelles sont les caractéristiques qui permettent de qualifier l’Allemagne nazie d’État totalitaire ?
+                </div>
+                <div class="example-box">
+                    Trouvez maintenant :\n
+                    • Le contexte\n
+                    • La définition des termes clés\n
+                    • La problématique
+                </div>`,
+                choices: [
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit du contexte.", next: "exemple_intro_2" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la définition des termes clés.", next: "exemple_intro_error_1" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la problématique.", next: "exemple_intro_error_2" }
+                ]
+            },
+            exemple_intro_2: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié le contexte. Trouvez maintenant :\n
+                    • La définition des termes clés\n
+                    • La problématique
+                </div>`,
+                choices: [
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la définition des termes clés.", next: "exemple_intro_3" },
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la problématique.", next: "exemple_intro_error_3" }
+                ]
+            },
+            exemple_intro_3: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié la définition des termes clés. Trouvez maintenant :\n
+                    • La problématique
+                </div>`,
+                choices: [
+                    { text: "« Quelles sont les caractéristiques qui permettent de qualifier l’Allemagne nazie d’État totalitaire ? » il s’agit de la problématique.", next: "exemple_intro_success" }
+                ]
+            },
+            exemple_intro_success: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié tous les éléments de l'introduction.
+                </div>`,
+                choices: [
+                    { text: "Voir la méthode AEI", next: "aei" },
+                    { text: "Retour au début", next: "methode" }
+                ]
+            },
+            exemple_intro_error_1: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la définition des termes clés.", next: "exemple_intro_error_2" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la problématique.", next: "exemple_intro_2" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit du contexte.", next: "exemple_intro_2" }
+                ])
+            },
+            exemple_intro_error_2: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit du contexte.", next: "exemple_intro_2" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la définition des termes clés.", next: "exemple_intro_error_1" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit de la problématique.", next: "exemple_intro_2" }
+                ])
+            },
+            exemple_intro_error_3: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la définition des termes clés.", next: "exemple_intro_3" },
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la problématique.", next: "exemple_intro_error_4" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit du contexte.", next: "exemple_intro_2" }
+                ])
+            },
+            exemple_intro_error_4: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la problématique.", next: "exemple_intro_error_3" },
+                    { text: "« régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression » il s’agit de la définition des termes clés.", next: "exemple_intro_3" },
+                    { text: "« En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire » il s’agit du contexte.", next: "exemple_intro_2" }
+                ])
+            },
+            aei: {
+                message: "## La méthode AEI pour le développement :\n\nChaque paragraphe doit contenir :\n• A : Argument (votre idée principale)\n• E : Explication (développez votre idée)\n• I : Illustration (un exemple précis)\n\nVoulez-vous voir un exemple ?",
+                choices: [
+                    { text: "Voir l'exemple", next: "exemple_aei_1" }
+                ]
+            },
+            exemple_aei_1: {
+                message: `<div class="example-box">
+                    En premier lieu, l’Allemagne nazie est une dictature puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). En juillet 1933, le parti nazi devient parti unique (il n’y a plus d’élections), les syndicats sont interdits et la presse est censurée. Les libertés individuelles et collectives (ex: manifester) sont donc supprimées.
+                </div>
+                <div class="example-box">
+                    Trouvez maintenant :\n
+                    • L’argument\n
+                    • L’explication\n
+                    • L’illustration
+                </div>`,
+                choices: [
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’argument.", next: "exemple_aei_2" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’explication.", next: "exemple_aei_error_1" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’illustration.", next: "exemple_aei_error_2" }
+                ]
+            },
+            exemple_aei_2: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié l’argument. Trouvez maintenant :\n
+                    • L’explication\n
+                    • L’illustration
+                </div>`,
+                choices: [
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’explication.", next: "exemple_aei_3" },
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’illustration.", next: "exemple_aei_error_3" }
+                ]
+            },
+            exemple_aei_3: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié l’explication. Trouvez maintenant :\n
+                    • L’illustration
+                </div>`,
+                choices: [
+                    { text: "« En juillet 1933, le parti nazi devient parti unique (il n’y a plus d’élections), les syndicats sont interdits et la presse est censurée. Les libertés individuelles et collectives (ex: manifester) sont donc supprimées. » il s’agit de l’illustration.", next: "exemple_aei_success" }
+                ]
+            },
+            exemple_aei_success: {
+                message: `<div class="example-box">
+                    Bravo ! Vous avez correctement identifié tous les éléments du paragraphe AEI.
+                </div>`,
+                choices: [
+                    { text: "Les connecteurs", next: "connecteurs" },
+                    { text: "La conclusion", next: "conclusion" }
+                ]
+            },
+            exemple_aei_error_1: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’explication.", next: "exemple_aei_error_2" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’illustration.", next: "exemple_aei_2" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’argument.", next: "exemple_aei_2" }
+                ])
+            },
+            exemple_aei_error_2: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’argument.", next: "exemple_aei_2" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’explication.", next: "exemple_aei_error_1" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’illustration.", next: "exemple_aei_2" }
+                ])
+            },
+            exemple_aei_error_3: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’explication.", next: "exemple_aei_3" },
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’illustration.", next: "exemple_aei_error_4" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’argument.", next: "exemple_aei_2" }
+                ])
+            },
+            exemple_aei_error_4: {
+                message: `<div class="example-box">
+                    Tu t'es trompé, recommence.
+                </div>`,
+                choices: generateRandomChoices([
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’illustration.", next: "exemple_aei_error_3" },
+                    { text: "« puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). » il s’agit de l’explication.", next: "exemple_aei_3" },
+                    { text: "« En premier lieu, l’Allemagne nazie est une dictature » il s’agit de l’argument.", next: "exemple_aei_2" }
+                ])
+            },
+            connecteurs: {
+                message: "## Les connecteurs logiques à utiliser :\n\n• Pour commencer : 'En premier lieu', 'Tout d'abord'\n• Pour ajouter : 'De plus', 'Par ailleurs', 'Parallèlement'\n• Pour conclure : 'Enfin', 'Pour terminer'\n\nVoici quelques conseils :",
+                choices: [
+                    { text: "Voir la conclusion", next: "conclusion" },
+                    { text: "Conseils pratiques", next: "conseils" }
+                ]
+            },
+            conclusion: {
+                message: "## La conclusion doit :\n\n1. Commencer par 'En conclusion'\n2. Résumer les idées principales\n3. Répondre à la problématique\n4. Ne pas introduire de nouveaux exemples\n\nVoulez-vous voir un exemple ?",
+                choices: [
+                    { text: "Voir l'exemple", next: "exemple_conclusion" },
+                    { text: "Conseils pratiques", next: "conseils" }
+                ]
+            },
+            exemple_conclusion: {
+                message: `<div class="example-box">
+                    "En conclusion, l'Allemagne nazie est un régime totalitaire car elle repose sur le pouvoir d'un seul chef. La société est encadrée, soumise à la propagande et à la terreur. Enfin, l'Allemagne nazie est également un régime raciste et antisémite."
+                </div>`,
+                choices: [
+                    { text: "Conseils pratiques", next: "conseils" },
+                    { text: "Voir le sujet complet", next: "exemple_sujet" }
+                ]
+            },
+            conseils: {
+                message: `<div class="method-box">
+                    Conseils pour réussir :\n\n
+                    1. Au brouillon :\n
+                    • Souligner les mots-clés\n
+                    • Noter les dates importantes\n
+                    • Faire un plan\n\n
+                    2. Pendant la rédaction :\n
+                    • Soigner l'écriture\n
+                    • Aérer le texte\n
+                    • Utiliser des connecteurs
+                </div>`,
+                choices: [
+                    { text: "Voir un exemple complet", next: "exemple_sujet" },
+                    { text: "Revoir la méthode", next: "methode" }
+                ]
+            },
+            exemple_sujet: {
+                message: `<div class="example-box">
+                    En janvier 1933, Hitler devient Chancelier. Rapidement il transforme l’Allemagne en État totalitaire: régime dans lequel l'État cherche à tout contrôler et obtenir la soumission de la population par la propagande et la répression. Quelles sont les caractéristiques qui permettent de qualifier l’Allemagne nazie d’État totalitaire ?
+
+                    En premier lieu, l’Allemagne nazie est une dictature puisqu’en mars 1933 les députés votent les pleins pouvoirs à Hitler (le Führer=guide). En juillet 1933, le parti nazi devient parti unique (il n’y a plus d’élections), les syndicats sont interdits et la presse est censurée. Les libertés individuelles et collectives (ex: manifester) sont donc supprimées.
+
+                    Parallèlement, la Société allemande est encadrée par le régime. Par exemple, les enfants sont embrigadés dans les jeunesses hitlériennes dans laquelle on leur apprend à obéir au régime. Cette dictature se traduit aussi par le développement d’un culte de la personnalité envers Hitler qui est mis en valeur par la propagande, dans les actualités au cinéma ou lors de cérémonies de masse à Nuremberg.
+                    De plus, la population est soumise à la terreur du régime, les opposants au régime sont traqués par la Gestapo (police politique) et/ou déportés dans des camps de concentration comme celui de Dachau ouvert dès mars 1933.
+
+                    C’est également un régime expansionniste qui prépare une guerre de «revanche» contre la France afin de revenir sur le traité de Versailles de 1919 et qui souhaite garantir à son peuple un «espace vital» par une politique agressive en Europe de l’Est.
+                    Enfin, l’Allemagne nazie est un régime raciste. Hitler considère qu’il appartient à une race humaine supérieure (les Aryens), pour lui les slaves, les homosexuels ou les juifs appartiennent à une race inférieure. Des mesures antisémites (=haine des juifs) écartent les juifs de certaines professions. C’est le cas en 1935, des lois de Nuremberg qui séparent les juifs des autres Allemands en leur interdisant tout mariage mixte ainsi que de nombreux métiers. Les persécutions comme la « Nuit de cristal » en 1938 provoquent la mort de milliers de Juifs.
+
+                    En conclusion, l’Allemagne nazie est un régime totalitaire car elle repose sur le pouvoir d’un seul chef. Car la société est encadrée, soumise à la propagande et à la terreur. Enfin, l’Allemagne nazie est également un régime raciste et antisémite.
+                </div>`,
+                choices: [
+                    { text: "Conseils pratiques", next: "conseils" },
+                    { text: "Revoir la méthode", next: "methode" }
+                ]
+            }
+        };
+
+        function addMessage(content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <img src="https://forge.apps.education.fr/epruvost3/chatbot-hg110/-/raw/Images/OIG-removebg-preview.png" alt="Avatar assistant">
+                <div class="bot-message">${content.replace(/\n/g, '<br>')}</div>
+            `;
+            chatContent.appendChild(messageDiv);
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        function addChoices(choices) {
+            const choicesDiv = document.createElement('div');
+            choicesDiv.className = 'choices';
+
+            choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice.text;
+                button.onclick = () => showStep(choice.next);
+                choicesDiv.appendChild(button);
+            });
+
+            chatContent.appendChild(choicesDiv);
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        function showStep(step) {
+            const currentStep = chatData[step];
+            if (currentStep) {
+                addMessage(currentStep.message);
+                addChoices(currentStep.choices);
+            }
+        }
+
+        function generateRandomChoices(choices) {
+            const shuffledChoices = choices.sort(() => Math.random() - 0.5);
+            return shuffledChoices;
+        }
+
+        // Démarrer le chatbot
+        showStep('start');
+    </script>
+</body>
+</html>
+
